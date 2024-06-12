@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Put, Patch, Delete, UseGuards } from "@nestjs/common";
+import { Controller, Post, Body, Get, Put, Patch, Delete, UseGuards, UseInterceptors } from "@nestjs/common";
 import { CreateUserDTO } from "./dto/create-user.dto";
 import { UpdatePutUserDTO } from "./dto/update-user-dto";
 import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto";
@@ -8,9 +8,10 @@ import { Roles } from "src/decorators/roles.decorator";
 import { Role } from "src/enums/role.enum";
 import { RoleGuard } from "src/guards/role.guard";
 import { AuthGuard } from "src/guards/auth.guard";
+import { LogInterceptor } from "src/interceptors/log.interceptor";
 
-//@UseInterceptors(LogInterceptor) // Aplica o interceptador para todas as rotas do controller
 @Roles(Role.ADMIN)
+@UseInterceptors(LogInterceptor) // Aplica o interceptador para todas as rotas do controller
 @UseGuards(AuthGuard, RoleGuard) // A ordem dos Guards é importante
 @Controller('users')
 export class UserController {
