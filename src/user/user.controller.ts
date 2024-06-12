@@ -9,7 +9,6 @@ import { Role } from "src/enums/role.enum";
 import { RoleGuard } from "src/guards/role.guard";
 import { AuthGuard } from "src/guards/auth.guard";
 import { LogInterceptor } from "src/interceptors/log.interceptor";
-
 @Roles(Role.ADMIN)
 @UseInterceptors(LogInterceptor) // Aplica o interceptador para todas as rotas do controller
 @UseGuards(AuthGuard, RoleGuard) // A ordem dos Guards é importante
