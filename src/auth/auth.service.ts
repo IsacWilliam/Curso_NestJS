@@ -58,6 +58,9 @@ export class AuthService {
     }
 
     async login(email: string, password: string){
+        
+        // console.log('Variáveis de ambiente: ', process.env); // REMOVER - NÃO ENVIAR PARA PRD
+
         const user = await this.prisma.user.findFirst({
             where: {
                 email
