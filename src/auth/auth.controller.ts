@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, UseInterceptors, UploadedFile, UploadedFiles, BadRequestException} from "@nestjs/common";
+import { Body, Controller, Post, UseGuards, UseInterceptors, UploadedFile, UploadedFiles, BadRequestException, ParseFilePipe, FileTypeValidator, MaxFileSizeValidator} from "@nestjs/common";
 import { AuthLoginDTO } from "./dto/auth-login.dto";
 import { AuthRegisterDTO } from "./dto/auth-register.dto";
 import { AuthForgetDTO } from "./dto/auth-forget.dto";
@@ -49,7 +49,19 @@ export class AuthController {
     @UseInterceptors(FileInterceptor('file'))
     @UseGuards(AuthGuard)
     @Post('photo')
-    async uploadPhoto(@User() user, @UploadedFile() photo: Express.Multer.File){
+    async uploadPhoto(
+        @User() user,
+        @UploadedFile(new ParseFilePipe({
+            validators: [
+                //new FileTypeValidator({fileType: 'image/jpeg || image/png'}), // Funciona, mas não é o correto
+                
+                //new FileTypeValidator({ fileType: 'image/jpeg' }), // O correto é validar...
+                //new FileTypeValidator({ fileType: 'image/png' }),  // ...item a item, separadamente ou ainda
+
+                new FileTypeValidator({ fileType: /image\/(jpeg|png)/ }), // utilizar uma Expressão Regular(REGEX)
+                new MaxFileSizeValidator({ maxSize: 1024 * 200}) // Validar o tamanho do arquivo
+            ]
+        })) photo: Express.Multer.File){
 
         const path = join(__dirname, '..', '..', 'storage', 'photos', `photo-${user.id}.jpeg`);
 
