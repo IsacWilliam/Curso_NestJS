@@ -1,11 +1,12 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthRegisterDTO } from './dto/auth-register.dto';
 import { UserService } from 'src/user/user.service';
 import { MailerService } from '@nestjs-modules/mailer/dist';
 import * as bcrypt from 'bcrypt';
+import { UserEntity } from 'src/user/entity/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -15,12 +16,13 @@ export class AuthService {
 
     constructor(
         private readonly jwtService: JwtService,
-        private readonly prisma: PrismaService,
         private readonly userService: UserService,
-        private readonly mailer: MailerService
+        private readonly mailer: MailerService,
+        @InjectRepository(UserEntity)
+        private usersRepository: Repository<UserEntity>
     ){}
 
-    createToken(user: User) {
+    createToken(user: UserEntity) {
         return {
             accessToken: this.jwtService.sign({
                 // PAYLOAD
@@ -63,7 +65,8 @@ export class AuthService {
         
         // console.log('Variáveis de ambiente: ', process.env); // REMOVER - NÃO ENVIAR PARA PRD
 
-        const user = await this.prisma.user.findFirst({
+        //const user = await this.usersRepository.findOneBy({ email }); //Equivalente com o FindOne abaixo
+        const user = await this.usersRepository.findOne({ 
             where: {
                 email
             }
@@ -81,7 +84,7 @@ export class AuthService {
     }
 
     async forget(email: string){
-        const user = await this.prisma.user.findFirst({
+        const user = await this.usersRepository.findOne({
             where: {
                 email
             }
@@ -127,16 +130,14 @@ export class AuthService {
             const salt = await bcrypt.genSalt();
             password = await bcrypt.hash(password, salt);
             
-            const user = await this.prisma.user.update({
-                where: {
-                    id: Number(data.id)
-                },
-                data: {
-                    password
-                }
+            await this.usersRepository.update(Number(data.id), {
+                password
             });
-    
+            
+            const user = await this.userService.show(Number(data.id));
+
             return this.createToken(user);
+
         }catch(e) {
             throw new BadRequestException(e);
         }
