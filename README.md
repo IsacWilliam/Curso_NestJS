@@ -71,3 +71,8 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+
+## Curso realizado com a HCODE
+
+Link do projeto original do curso [AQUI!](https://github.com/hcodebr/nestjs-prisma-mysql/tree/3a36238e576e965df7e79e1759a455df3397ab9f)
