@@ -47,9 +47,7 @@ export class UserService {
     async show(id: number){
         await this.exists(id);
 
-        return this.usersRepository.findOne({
-            where: { id }
-        });
+        return this.usersRepository.findOneBy({ id });
     }
 
     async update(id: number, {email, name, password, birthAt, role}: UpdatePutUserDTO) {
@@ -100,7 +98,6 @@ export class UserService {
             data.role = role;
         }
         
-
         await this.usersRepository.update(id, data);
 
         return this.show(id);
@@ -110,7 +107,9 @@ export class UserService {
         
         await this.exists(id);
 
-        return this.usersRepository.delete(id);
+        await this.usersRepository.delete(id);
+
+        return true;
     }
 
     async exists(id: number) {
