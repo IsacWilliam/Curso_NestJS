@@ -6,11 +6,11 @@ export const usersRepositoryMock = {
     provide: getRepositoryToken(UserEntity),
     useValue: {
         exist: jest.fn().mockReturnValue(true),
-        create: jest.fn(),
+        create: jest.fn().mockReturnValue(userEntityList[0]),
         save: jest.fn().mockResolvedValue(userEntityList[0]),
         find: jest.fn().mockResolvedValue(userEntityList),
         findOneBy: jest.fn().mockResolvedValue(userEntityList[0]),
-        update: jest.fn(),
-        delete: jest.fn()
+        update: jest.fn().mockResolvedValue({ affected: 1 }), // Indica que uma linha foi atualizada
+        delete: jest.fn().mockResolvedValue({ affected: 1 }) // Indica que uma linha foi deletada
     }
-}
+};

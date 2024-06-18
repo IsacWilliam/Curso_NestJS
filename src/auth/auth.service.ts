@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRegisterDTO } from './dto/auth-register.dto';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 import { MailerService } from '@nestjs-modules/mailer/dist';
 import * as bcrypt from 'bcrypt';
-import { UserEntity } from 'src/user/entity/user.entity';
+import { UserEntity } from '../user/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -65,12 +65,12 @@ export class AuthService {
         
         // console.log('Variáveis de ambiente: ', process.env); // REMOVER - NÃO ENVIAR PARA PRD
 
-        //const user = await this.usersRepository.findOneBy({ email }); //Equivalente com o FindOne abaixo
-        const user = await this.usersRepository.findOne({ 
+        const user = await this.usersRepository.findOneBy({ email }); 
+        /*const user = await this.usersRepository.findOne({ //Equivalente com o FindOneBy acima
             where: {
                 email
             }
-        });
+        });*/
 
         if(!user) {
             throw new UnauthorizedException('E-mail e/ou senha incorretos.');
@@ -84,17 +84,19 @@ export class AuthService {
     }
 
     async forget(email: string){
-        const user = await this.usersRepository.findOne({
+
+        const user = await this.usersRepository.findOneBy({ email })
+        /*const user = await this.usersRepository.findOne({
             where: {
                 email
             }
-        });
+        });*/
 
         if(!user) {
             throw new UnauthorizedException('E-mail incorreto.');
         }
 
-        const token = this.jwtService.sign({
+        const accessToken = this.jwtService.sign({
             id: user.id
         },{
             expiresIn: "30 minutes",
@@ -109,41 +111,55 @@ export class AuthService {
             template: 'forget',
             context: {
                 name: user.name,
-                token
+                accessToken
             }
         });
 
-        return {token};
+        return {accessToken};
     }
 
-    async reset(password: string, token: string){
+    async reset(password: string, token: string) {
         try {
             const data: any = this.jwtService.verify(token, {
                 issuer: 'forget',
                 audience: 'users'
             });
-
-            if(isNaN(Number(data.id))) {
+    
+            console.log('Token data:', data);
+    
+            if (isNaN(Number(data.id))) {
                 throw new BadRequestException("Token inválido.");
             }
-
+    
             const salt = await bcrypt.genSalt();
             password = await bcrypt.hash(password, salt);
+            
             
             await this.usersRepository.update(Number(data.id), {
                 password
             });
             
+            console.log('Password updated for user ID:', data.id);
+
             const user = await this.userService.show(Number(data.id));
 
-            return this.createToken(user);
+            console.log('User fetched:', user);
 
-        }catch(e) {
+            const newToken =this.createToken(user);
+
+            console.log('Token created:', newToken);
+
+            return newToken;
+
+        } catch (e) {
             throw new BadRequestException(e);
         }
     }
+    
 
     async register(data: AuthRegisterDTO) {
+
+        delete data.role;
 
         const user = await this.userService.create(data);
 
