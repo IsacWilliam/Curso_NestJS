@@ -3,19 +3,17 @@ import { AuthLoginDTO } from "./dto/auth-login.dto";
 import { AuthRegisterDTO } from "./dto/auth-register.dto";
 import { AuthForgetDTO } from "./dto/auth-forget.dto";
 import { AuthResetDTO } from "./dto/auth-reset.dto";
-import { UserService } from "../user/user.service";
 import { AuthService } from "./auth.service";
 import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/user.decorator";
 import { FileInterceptor, FilesInterceptor, FileFieldsInterceptor } from "@nestjs/platform-express";
-import { join } from "path";
 import { FileService } from "../file/file.service";
+import { UserEntity } from "../user/entity/user.entity";
 
 @Controller('auth')
 export class AuthController {
 
     constructor(
-        private readonly userService: UserService,
         private readonly authService: AuthService,
         private readonly fileService: FileService
     ){}
@@ -42,7 +40,7 @@ export class AuthController {
     
     @UseGuards(AuthGuard)
     @Post('me')
-    async me(@User() user, @Req() {tokenPayload}){
+    async me(@User() user: UserEntity, @Req() {tokenPayload}){
         return {user, tokenPayload};
     }
     
@@ -50,7 +48,7 @@ export class AuthController {
     @UseGuards(AuthGuard)
     @Post('photo')
     async uploadPhoto(
-        @User() user,
+        @User() user: UserEntity,
         @UploadedFile(new ParseFilePipe({
             validators: [
                 //new FileTypeValidator({fileType: 'image/jpeg || image/png'}), // Funciona, mas não é o correto
@@ -58,7 +56,7 @@ export class AuthController {
                 //new FileTypeValidator({ fileType: 'image/jpeg' }), // O correto é validar...
                 //new FileTypeValidator({ fileType: 'image/png' }),  // ...item a item, separadamente ou ainda
 
-                new FileTypeValidator({ fileType: /image\/(jpeg|png)/ }), // utilizar uma Expressão Regular(REGEX)
+                new FileTypeValidator({ fileType: /image\/(jpeg|png|jpg)/ }), // utilizar uma Expressão Regular(REGEX)
                 new MaxFileSizeValidator({ maxSize: 1024 * 200}) // Validar o tamanho do arquivo
             ]
         })) photo: Express.Multer.File){
@@ -71,7 +69,7 @@ export class AuthController {
             throw new BadRequestException(e);
         }
 
-        return {success: true};
+        return photo;
     }
     
     @UseInterceptors(FilesInterceptor('files'))
@@ -81,16 +79,7 @@ export class AuthController {
         return files;
     }
     
-    @UseInterceptors(FileFieldsInterceptor([
-        {
-            name: 'photo',
-            maxCount: 1
-        },
-        {
-            name: 'documents',
-            maxCount: 10
-        }
-    ]))
+    @UseInterceptors(FileFieldsInterceptor([{name: 'photo', maxCount: 1},{name: 'documents', maxCount: 10}]))
     @UseGuards(AuthGuard)
     @Post('files-fields')
     async uploadFilesFields(@User() user, @UploadedFiles() files: {photo: Express.Multer.File, documents: Express.Multer.File[]}){

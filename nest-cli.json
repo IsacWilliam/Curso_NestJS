@@ -6,6 +6,10 @@
     "assets": [{
       "include": "templates/**/*",
       "outDir": "dist/src"
-    }]
+    },{
+      "include": "storage/**/*",
+      "outDir": "dist/src"
+    }
+  ]
   }
 }
