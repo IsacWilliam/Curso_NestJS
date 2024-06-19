@@ -8,7 +8,7 @@
       "outDir": "dist/src"
     },{
       "include": "storage/**/*",
-      "outDir": "dist/src"
+      "outDir": "dist"
     }
   ]
   }

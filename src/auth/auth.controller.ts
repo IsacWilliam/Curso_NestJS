@@ -59,7 +59,9 @@ export class AuthController {
                 new FileTypeValidator({ fileType: /image\/(jpeg|png|jpg)/ }), // utilizar uma Expressão Regular(REGEX)
                 new MaxFileSizeValidator({ maxSize: 1024 * 200}) // Validar o tamanho do arquivo
             ]
-        })) photo: Express.Multer.File){
+        })) 
+        
+        photo: Express.Multer.File){
 
         const filename = `photo-${user.id}.jpeg`;
 
