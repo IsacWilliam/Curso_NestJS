@@ -13,7 +13,7 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ envFilePath: process.env.ENV === 'test' ? '.env.test' : '.env' }),
     ThrottlerModule.forRoot({
       ttl: 60,  // Em 60 segundos
       limit: 100  // Permite 100 acessos
