@@ -30,7 +30,7 @@ describe('AppController (e2e)', () => {
       .expect(200)
       .expect('Hello World!');
   });
-  
+
   it('Registrar um novo usuário', async () => {
     const response = await request(app.getHttpServer())
       .post('/auth/register')
@@ -39,13 +39,13 @@ describe('AppController (e2e)', () => {
     expect(response.statusCode).toEqual(201);
     expect(typeof response.body.accessToken).toEqual('string');
   });
-  
+
   it('Tentar fazer login com o novo usuário', async () => {
     const response = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: authRegisterDTO.email,
-        password: authRegisterDTO.password
+        password: authRegisterDTO.password,
       });
 
     expect(response.statusCode).toEqual(201);
@@ -53,23 +53,23 @@ describe('AppController (e2e)', () => {
 
     accessToken = response.body.accessToken;
   });
-  
+
   it('Obter dados do usuário logado', async () => {
     const response = await request(app.getHttpServer())
       .post('/auth/me')
       .set('Authorization', `bearer ${accessToken}`)
       .send();
 
-      expect(response.statusCode).toEqual(201);
+    expect(response.statusCode).toEqual(201);
     expect(typeof response.body.user.id).toEqual('number');
     expect(response.body.user.role).toEqual(Role.USER);
   });
-  
+
   it('Registrar novo usuário como ADM', async () => {
     const response = await request(app.getHttpServer())
       .post('/auth/register')
-      .send({...authRegisterDTO, role: Role.ADMIN, email: 'luiza@teste.com'});
-    
+      .send({ ...authRegisterDTO, role: Role.ADMIN, email: 'luiza@teste.com' });
+
     expect(response.statusCode).toEqual(201);
     expect(typeof response.body.accessToken).toEqual('string');
 

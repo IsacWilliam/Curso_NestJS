@@ -13,15 +13,17 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ envFilePath: process.env.ENV === 'test' ? '.env.test' : '.env' }),
+    ConfigModule.forRoot({
+      envFilePath: process.env.ENV === 'test' ? '.env.test' : '.env',
+    }),
     ThrottlerModule.forRoot({
-      ttl: 60,  // Em 60 segundos
-      limit: 100  // Permite 100 acessos
+      ttl: 60, // Em 60 segundos
+      limit: 100, // Permite 100 acessos
     }),
     forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
     MailerModule.forRoot({
-      transport:{ 
+      transport: {
         host: 'smtp.ethereal.email',
         port: 587,
         secure: false, // true for 465, false for other ports
@@ -30,8 +32,8 @@ import { AppService } from './app.service';
           pass: 'J6zS8GZcyN1fyQpmTx',
         },
         tls: {
-          rejectUnauthorized: false
-        }
+          rejectUnauthorized: false,
+        },
       },
       defaults: {
         from: '"Isac" <rudolph48@ethereal.email>',
@@ -53,14 +55,17 @@ import { AppService } from './app.service';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [UserEntity],
-      synchronize: process.env.ENV === "development"
-    })
+      synchronize: process.env.ENV === 'development',
+    }),
   ],
   controllers: [AppController],
-  providers: [AppService, {
-    provide: APP_GUARD,
-    useClass: ThrottlerGuard
-  }],
-  exports: [AppService]
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
+  exports: [AppService],
 })
 export class AppModule {}

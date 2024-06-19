@@ -1,125 +1,134 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateUserDTO } from "./dto/create-user.dto";
-import { UpdatePutUserDTO } from "./dto/update-user-dto";
-import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { CreateUserDTO } from './dto/create-user.dto';
+import { UpdatePutUserDTO } from './dto/update-user-dto';
+import { UpdatePatchUserDTO } from './dto/update-patch-user.dto';
 import * as bcrypt from 'bcrypt';
-import { Repository } from "typeorm";
-import { UserEntity } from "./entity/user.entity";
-import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from 'typeorm';
+import { UserEntity } from './entity/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserService {
+  constructor(
+    @InjectRepository(UserEntity)
+    private usersRepository: Repository<UserEntity>,
+  ) {}
 
-    constructor(
-        @InjectRepository(UserEntity)
-        private usersRepository: Repository<UserEntity>
-    ) {}
-
-    async create(data: CreateUserDTO) {
-
-        if(await this.usersRepository.exist({
-            where: {
-                email: data.email
-            }
-        })){
-            throw new BadRequestException('Este email já está cadastrado!');
-        }
-        
-        const salt = await bcrypt.genSalt();
-        
-        //console.log('Salt: ', salt);
-        //console.log('Senha SEM hash: ', data.password);
-        
-        data.password = await bcrypt.hash(data.password, await salt);
-        
-        //console.log('Senha COM hash: ', data.password);
-        
-        const user = this.usersRepository.create(data);
-        
-        return this.usersRepository.save(user);
-        
+  async create(data: CreateUserDTO) {
+    if (
+      await this.usersRepository.exist({
+        where: {
+          email: data.email,
+        },
+      })
+    ) {
+      throw new BadRequestException('Este email já está cadastrado!');
     }
 
-    async list(){
-        return this.usersRepository.find();
-    }
-    
-    async show(id: number){
-        await this.exists(id);
+    const salt = await bcrypt.genSalt();
 
-        return this.usersRepository.findOneBy({ id });
-    }
+    //console.log('Salt: ', salt);
+    //console.log('Senha SEM hash: ', data.password);
 
-    async update(id: number, {email, name, password, birthAt, role}: UpdatePutUserDTO) {
-        //console.log('update: ', {data})
+    data.password = await bcrypt.hash(data.password, await salt);
 
-        await this.exists(id);
+    //console.log('Senha COM hash: ', data.password);
 
-        const salt = await bcrypt.genSalt();
+    const user = this.usersRepository.create(data);
 
-        password = await bcrypt.hash(password, salt);
+    return this.usersRepository.save(user);
+  }
 
-        await this.usersRepository.update(id, {
-            email,
-            name,
-            password,
-            birthAt: birthAt ? new Date(birthAt) : null,
-            role
-        });
+  async list() {
+    return this.usersRepository.find();
+  }
 
-        return this.show(id);
-    }
-    
-    async updatePartial(id: number, {email, name, password, birthAt, role}: UpdatePatchUserDTO) {
-        //console.log('updatePartial: ', {data})
+  async show(id: number) {
+    await this.exists(id);
 
-        await this.exists(id);
+    return this.usersRepository.findOneBy({ id });
+  }
 
-        const data: any = {};
+  async update(
+    id: number,
+    { email, name, password, birthAt, role }: UpdatePutUserDTO,
+  ) {
+    //console.log('update: ', {data})
 
-        if(birthAt) {
-            data.birthAt = new Date(birthAt);
-        }
-        
-        if(email) {
-            data.email = email;
-        }
+    await this.exists(id);
 
-        if(name) {
-            data.name = name;
-        }
+    const salt = await bcrypt.genSalt();
 
-        if(password) {
-            const salt = await bcrypt.genSalt();
-            data.password = await bcrypt.hash(password, salt);
-        }
-        
-        if(role) {
-            data.role = role;
-        }
-        
-        await this.usersRepository.update(id, data);
+    password = await bcrypt.hash(password, salt);
 
-        return this.show(id);
+    await this.usersRepository.update(id, {
+      email,
+      name,
+      password,
+      birthAt: birthAt ? new Date(birthAt) : null,
+      role,
+    });
+
+    return this.show(id);
+  }
+
+  async updatePartial(
+    id: number,
+    { email, name, password, birthAt, role }: UpdatePatchUserDTO,
+  ) {
+    //console.log('updatePartial: ', {data})
+
+    await this.exists(id);
+
+    const data: any = {};
+
+    if (birthAt) {
+      data.birthAt = new Date(birthAt);
     }
 
-    async delete(id: number) {
-        
-        await this.exists(id);
-
-        await this.usersRepository.delete(id);
-
-        return true;
+    if (email) {
+      data.email = email;
     }
 
-    async exists(id: number) {
-
-        if(!(await this.usersRepository.exist({
-            where: {
-                id
-            }
-        }))) {
-            throw new NotFoundException (`O usuário ${id} não existe!`);
-        }
+    if (name) {
+      data.name = name;
     }
+
+    if (password) {
+      const salt = await bcrypt.genSalt();
+      data.password = await bcrypt.hash(password, salt);
+    }
+
+    if (role) {
+      data.role = role;
+    }
+
+    await this.usersRepository.update(id, data);
+
+    return this.show(id);
+  }
+
+  async delete(id: number) {
+    await this.exists(id);
+
+    await this.usersRepository.delete(id);
+
+    return true;
+  }
+
+  async exists(id: number) {
+    if (
+      !(await this.usersRepository.exist({
+        where: {
+          id,
+        },
+      }))
+    ) {
+      throw new NotFoundException(`O usuário ${id} não existe!`);
+    }
+  }
 }

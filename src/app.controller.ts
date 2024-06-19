@@ -9,7 +9,7 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-  
+
   @Post()
   setHello(): string {
     return 'POST: Hello HCode!';

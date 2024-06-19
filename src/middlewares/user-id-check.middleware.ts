@@ -1,17 +1,16 @@
-import { BadRequestException, NestMiddleware } from "@nestjs/common";
-import { NextFunction, Request, Response } from "express";
+import { BadRequestException, NestMiddleware } from '@nestjs/common';
+import { NextFunction, Request, Response } from 'express';
 
 export class UserIdCheckMiddleware implements NestMiddleware {
-    use(req: Request, res: Response, next: NextFunction) {
+  use(req: Request, res: Response, next: NextFunction) {
+    console.log('Antes do Middleware');
 
-        console.log('Antes do Middleware');
-
-        if(isNaN(Number(req.params.id)) || Number(req.params.id) <= 0) {
-            throw new BadRequestException('ID inválido.');
-        }
-
-        console.log('Depois do Middleware');
-        
-        next();
+    if (isNaN(Number(req.params.id)) || Number(req.params.id) <= 0) {
+      throw new BadRequestException('ID inválido.');
     }
+
+    console.log('Depois do Middleware');
+
+    next();
+  }
 }
