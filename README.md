@@ -75,6 +75,6 @@ Nest is [MIT licensed](LICENSE).
 
 ## Curso realizado com a HCODE
 
-Link do projeto original do curso na 1ª parte com Prisma [AQUI!](https://github.com/hcodebr/nestjs-prisma-mysql).
+- Link do projeto original do curso na 1ª parte com Prisma [AQUI!](https://github.com/hcodebr/nestjs-prisma-mysql).
 
-Link do projeto original do curso na 2ª parte com TypeORM [AQUI!](https://github.com/hcodebr/nestjs-typeorm-mysql).
+- Link do projeto original do curso na 2ª parte com TypeORM [AQUI!](https://github.com/hcodebr/nestjs-typeorm-mysql).
